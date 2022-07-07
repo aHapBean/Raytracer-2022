@@ -1,4 +1,5 @@
-use std::{fs::File, process::exit};
+use std::fs::File;
+use std::process::exit;
 
 use image::{ImageBuffer, RgbImage};
 
