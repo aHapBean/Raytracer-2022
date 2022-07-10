@@ -43,7 +43,7 @@ impl Vec3 {
     }
 
     pub fn length(&self) -> f64 {
-        return (Vec3::length_squared(&self)).sqrt(); //??
+        (Vec3::length_squared(&self)).sqrt() //??
     }
 
     pub fn length_squared(&self) -> f64 {
@@ -81,27 +81,27 @@ impl Vec3 {
     }
     pub fn random_unit_vector() -> Vec3 {
         //to delete
-        return Vec3::random_in_unit_sphere().unit_vector();
+        Vec3::random_in_unit_sphere().unit_vector()
     }
 
     pub fn random_in_hemisphere(normal: Vec3) -> Vec3 {
         let in_unit_sphere = Vec3::random_in_unit_sphere();
         if normal.copy().dot(in_unit_sphere.copy()) > 0.0 {
-            return in_unit_sphere;
+            in_unit_sphere
         } else {
-            return -1.0 * in_unit_sphere;
+            -1.0 * in_unit_sphere
         }
     }
     pub fn abs(s: f64) -> f64 {
         if s < 0.0 {
-            return -s;
+            -s
         } else {
-            return s;
+            s
         }
     }
     pub fn near_zero(&self) -> bool {
         let s: f64 = 1e-8;
-        return Vec3::abs(self.x) < s && Vec3::abs(self.y) < s && Vec3::abs(self.z) < s;
+        Vec3::abs(self.x) < s && Vec3::abs(self.y) < s && Vec3::abs(self.z) < s
     }
 }
 

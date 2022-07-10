@@ -13,31 +13,31 @@ mod ray;
 mod sphere;
 //模块声明
 
-use crate::mod_vec3::Dot;
-use mod_vec3::{Cross, Vec3};
+//use crate::mod_vec3::Dot;
+use mod_vec3::Vec3;
 
-use crate::sphere::Hittable_list;
+use crate::sphere::Hit;
+use crate::sphere::HittableList;
 use crate::sphere::Object;
 
 use ray::Ray; //类名就首字母大写
 
-use sphere::Hit;
-use sphere::Hit_record;
+use sphere::HitRecord;
 use sphere::Sphere; //trait 也要 use !
 
 use camera::Camera;
 
-use rand::Rng;
-
 use crate::material::Material;
 use crate::material::{Dielectric, Lambertian, Metal, Scatter};
+use core::f32::consts::PI;
+use rand::Rng;
 
 type Color = Vec3;
 type Point3 = Vec3;
 
 fn degree_to_radians(degrees: f64) -> f64 {
-    let pi = 3.1415926535897932385;
-    degrees * pi / 180.0
+    //let pi = 3.141_592_653_589_793; //;;_238_5;
+    degrees * PI as f64 / 180.0
 }
 fn random_double() -> f64 {
     //rand::rng.gen::<f64>()
@@ -45,7 +45,7 @@ fn random_double() -> f64 {
     a.gen_range(0.0..=1.0)
 }
 fn random_double_range(a: f64, b: f64) -> f64 {
-    return random_double() * (b - a) + a;
+    random_double() * (b - a) + a
 }
 fn random_in_unit_dist() -> Vec3 {
     loop {
@@ -71,7 +71,7 @@ fn clamp(x: f64, min: f64, max: f64) -> f64 {
     x
 }
 
-fn write_color(pixel_color: Color, samples_per_pixel: i32) {
+/*fn write_color(pixel_color: Color, samples_per_pixel: i32) {
     let tmp = 255.999;
     let mut r = pixel_color.copy().x;
     let mut g = pixel_color.copy().y;
@@ -82,21 +82,22 @@ fn write_color(pixel_color: Color, samples_per_pixel: i32) {
     g = (g * scale).sqrt();
     b = (b * scale).sqrt();
 
-    print!(
-        "{} {} {}\n",
+    println!(
+        "{} {} {}",
         256.0 * clamp(r, 0.0, 0.999),
         256.0 * clamp(g, 0.0, 0.999),
         256.0 * clamp(b, 0.0, 0.999),
     );
-}
+}*/
 
-fn ray_color(r: &Ray, world: &Hittable_list, depth: i32) -> Color {
+fn ray_color(r: &Ray, world: &HittableList, depth: i32) -> Color {
     let infinity = 1.79769e+308;
 
     if depth <= 0 {
-        return Color::new(0.0, 0.0, 1.0);
+        return Color::new(0.0, 0.0, 0.0);
     }
-    let mut rec = Hit_record::hit_record();
+
+    let mut rec = HitRecord::hitrecord();
 
     //传过来的world没有 None !
     //而我也保证了参数的正确传递！
@@ -127,12 +128,13 @@ fn ray_color(r: &Ray, world: &Hittable_list, depth: i32) -> Color {
     }
     let unit_direction = r.dir.unit_vector();
     let t = 0.5 * (unit_direction.y + 1.0);
-    return (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0);
+    (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
     //背景色
 } //作用 :配置光线的颜色
   //根据光线的信息，两个信息！起点和方向！
   //妙
 
+/*
 fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
     let oc: Vec3 = r.origin() - center.copy();
     let a: f64 = r.direction().dot(r.direction());
@@ -144,10 +146,10 @@ fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
     } else {
         return -1.0;
     }
-}
+}*/
 
-fn random_scene() -> Hittable_list {
-    let mut world = Hittable_list::hittable_list();
+fn random_scene() -> HittableList {
+    let mut world = HittableList::hittablelist();
 
     let ground_material = Material::Lam(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
     let ball = Object::Sp(Sphere::new(
@@ -203,18 +205,23 @@ fn random_scene() -> Hittable_list {
         1.0,
         material3,
     )));
-    return world;
+    world
 }
 
 fn main() {
     print!("{}[2J", 27 as char); // Clear screen
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char); // Set cursor position as 1,1
 
+    // to preserve the None
+    //let sph = Object::None;
+
+    //sph.cope();
+
     //my code
-    let pi: f64 = 3.1415926535897932385;
+    //let pi: f64 = 3.1415926535897932385;
     //Image
     let aspect_ratio: f64 = 16.0 / 9.0;
-    let image_width: f64 = 1200.0; //??
+    let image_width: f64 = 1600.0; //??
     let image_height: f64 = image_width as f64 / aspect_ratio;
 
     let height = image_height;
@@ -223,7 +230,7 @@ fn main() {
     let path = "output/output.jpg";
 
     let mut world = random_scene();
-    let R = (pi / 4.0).cos();
+    //let R = (pi / 4.0).cos();
 
     let lookfrom = Point3::new(13.0, 2.0, 3.0);
     let lookat = Point3::new(0.0, 0.0, 0.0);
@@ -266,13 +273,14 @@ fn main() {
     for j in 0..height as usize {
         for i in 0..width as usize {
             let mut my_pixel_color = Color::new(0.0, 0.0, 0.0);
-            for s in 0..samples_per_pixel {
+            for _s in 0..samples_per_pixel {
+                //_s ???
                 let u = (i as f64 + random_double()) as f64 / (image_width - 1.0);
                 let v = (j as f64 + random_double()) as f64 / (image_height - 1.0);
                 let r: Ray = cam.get_ray(u, v);
                 my_pixel_color = my_pixel_color.copy() + ray_color(&r, &world, max_depth);
             }
-            let tmp = 255.999;
+            //let tmp = 255.999;
             let mut r = my_pixel_color.copy().x;
             let mut g = my_pixel_color.copy().y;
             let mut b = my_pixel_color.copy().z;
@@ -293,6 +301,7 @@ fn main() {
             progress.inc(1);
         }
     }
+    world.clear(); //??
     progress.finish();
 
     // Output image to file

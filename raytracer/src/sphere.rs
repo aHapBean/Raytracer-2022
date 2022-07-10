@@ -1,21 +1,21 @@
 use crate::mod_vec3::Vec3;
 use crate::ray::Ray;
 //trait也需要
-use crate::material::{Lambertian, Material, Metal};
+use crate::material::Material;
 use crate::mod_vec3::Dot;
 type Point3 = Vec3;
 
-pub struct Hit_record {
+pub struct HitRecord {
     pub p: Point3,
     pub normal: Vec3,
     pub t: f64,
     pub front_face: bool,
     pub mat_ptr: Material,
-} //这个 ??
+}
 
-impl Hit_record {
-    pub fn hit_record() -> Hit_record {
-        Hit_record {
+impl HitRecord {
+    pub fn hitrecord() -> HitRecord {
+        HitRecord {
             p: Point3::vec3(),
             normal: Vec3::vec3(),
             t: 0.0,
@@ -23,8 +23,8 @@ impl Hit_record {
             mat_ptr: Material::None,
         }
     } //point & normal ??
-    pub fn new(pp: Point3, nor: Vec3, tt: f64, ff: bool, mat: Material) -> Hit_record {
-        Hit_record {
+    pub fn new(pp: Point3, nor: Vec3, tt: f64, ff: bool, mat: Material) -> HitRecord {
+        HitRecord {
             p: pp,
             normal: nor,
             t: tt,
@@ -32,7 +32,7 @@ impl Hit_record {
             mat_ptr: mat,
         }
     }
-    pub fn copy(&self) -> Hit_record {
+    pub fn copy(&self) -> HitRecord {
         //引用不能把。。因为这个相当于borrow
         let mat_ptr = match &self.mat_ptr {
             Material::None => Material::None,
@@ -41,7 +41,7 @@ impl Hit_record {
             Material::Diel(some) => Material::Diel(some.copy()),
         };
         //这里可以吗，直接反正不行
-        Hit_record::new(
+        HitRecord::new(
             self.p.copy(),
             self.normal.copy(),
             self.t,
@@ -66,7 +66,7 @@ impl Hit_record {
 
 pub trait Hit {
     //“基类”
-    fn hit(&self, r: Ray, t_min: f64, t_max: f64, rec: &mut Hit_record) -> bool;
+    fn hit(&self, r: Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool;
 }
 
 pub struct Sphere {
@@ -76,13 +76,13 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub fn sphere() -> Sphere {
-        Sphere {
-            center: Point3::vec3(),
-            radius: 0.0,
-            mat_ptr: Material::None,
-        }
-    }
+    //pub fn sphere() -> Sphere {
+    //    Sphere {
+    //        center: Point3::vec3(),
+    //        radius: 0.0,
+    //        mat_ptr: Material::None,
+    //    }
+    //}
     pub fn new(c: Point3, rad: f64, mat: Material) -> Sphere {
         Sphere {
             center: c,
@@ -104,13 +104,14 @@ impl Sphere {
 impl Hit for Sphere {
     //mut !!!!
     //                           引用
-    fn hit(&self, r: Ray, t_min: f64, t_max: f64, rec: &mut Hit_record) -> bool {
+    fn hit(&self, r: Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
         // the pub is implied ??
         let oc: Vec3 = r.origin() - self.center.copy();
         let a: f64 = r.direction().dot(r.direction());
         let half_b: f64 = r.direction().dot(oc.copy()); //所有函数都不引用。+.copy()就可以
         let c: f64 = oc.dot(oc.copy()) - self.radius * self.radius;
-        let det = half_b * half_b - a * c;
+        let hb = half_b;
+        let det = hb * half_b - a * c;
         if det < 0.0 {
             return false;
         }
@@ -135,7 +136,7 @@ impl Hit for Sphere {
         rec.set_face_normal(r.copy(), outward_normal.copy());
 
         //使用方法时不要加copy 不然方法可能无法更改到你自身
-        return true;
+        true
     }
 }
 pub enum Object {
@@ -143,19 +144,22 @@ pub enum Object {
     Sp(Sphere),
 }
 
-pub struct Hittable_list {
+pub struct HittableList {
     objects: Vec<Object>,
 }
 
-impl Hittable_list {
-    pub fn hittable_list() -> Hittable_list {
-        Hittable_list { objects: vec![] }
+impl HittableList {
+    pub fn hittablelist() -> HittableList {
+        let mut world = HittableList { objects: vec![] };
+        world.objects.push(Object::None);
+        world.objects.pop();
+        world
     }
-    pub fn new() -> Hittable_list {
-        Hittable_list {
-            objects: Vec::new(), //????
-        }
-    }
+    //pub fn new() -> HittableList {
+    //    HittableList {
+    //        objects: Vec::new(), //????
+    //    }
+    //}
 
     pub fn clear(&mut self) {
         self.objects.clear();
@@ -170,10 +174,10 @@ impl Hittable_list {
 }
 
 //
-impl Hit for Hittable_list {
+impl Hit for HittableList {
     //某点的重叠光影
-    fn hit(&self, r: Ray, t_min: f64, t_max: f64, rec: &mut Hit_record) -> bool {
-        let mut temp_rec: &mut Hit_record = &mut Hit_record::hit_record();
+    fn hit(&self, r: Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
+        let temp_rec: &mut HitRecord = &mut HitRecord::hitrecord();
         //???
         let mut hit_anything = false;
         let mut closest_so_far = t_max;
@@ -192,6 +196,6 @@ impl Hit for Hittable_list {
                 Object::None => (),
             }
         }
-        return hit_anything;
+        hit_anything
     }
 }

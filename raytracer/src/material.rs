@@ -1,7 +1,7 @@
 use crate::mod_vec3::Dot;
 use crate::mod_vec3::Vec3;
 use crate::ray::Ray;
-use crate::sphere::Hit_record;
+use crate::sphere::HitRecord;
 //use std::ops::Mul;
 use crate::random_double;
 //trait也需要声明
@@ -28,8 +28,8 @@ impl Material {
 pub trait Scatter {
     fn scatter(
         &self,
-        r: &Ray,
-        rec: &Hit_record,
+        r_in: &Ray,
+        rec: &HitRecord,
         attenuation: &mut Color,
         scattered: &mut Ray,
     ) -> bool;
@@ -43,11 +43,11 @@ pub struct Lambertian {
 }
 
 impl Lambertian {
-    pub fn lambertian() -> Lambertian {
-        Lambertian {
-            albedo: Color::vec3(),
-        }
-    }
+    //pub fn lambertian() -> Lambertian {
+    //    Lambertian {
+    //        albedo: Color::vec3(),
+    //    }
+    //}
     pub fn new(al: Color) -> Lambertian {
         Lambertian { albedo: al }
     }
@@ -61,8 +61,8 @@ impl Scatter for Lambertian {
     //针对某个物体自身的散射
     fn scatter(
         &self,
-        r: &Ray,
-        rec: &Hit_record,
+        _r: &Ray,
+        rec: &HitRecord,
         attenuation: &mut Color,
         scattered: &mut Ray,
     ) -> bool {
@@ -73,12 +73,12 @@ impl Scatter for Lambertian {
         }
         *scattered = Ray::new(rec.copy().p, scatter_direction);
         *attenuation = self.albedo.copy();
-        return true;
+        true
     }
 }
 impl Reflect for Lambertian {
     fn reflect(v: Vec3, n: Vec3) -> Vec3 {
-        return v.copy() - 2.0 * v.dot(n.copy()) * n.copy();
+        v.copy() - 2.0 * v.dot(n.copy()) * n.copy()
     }
 }
 
@@ -87,12 +87,12 @@ pub struct Metal {
     fuzz: f64,
 }
 impl Metal {
-    pub fn metal() -> Metal {
-        Metal {
-            albedo: Color::vec3(),
-            fuzz: 0.0,
-        }
-    }
+    //pub fn metal() -> Metal {
+    //    Metal {
+    //        albedo: Color::vec3(),
+    //        fuzz: 0.0,
+    //    }
+    //}
     pub fn new(al: Color, fu: f64) -> Metal {
         let f: f64;
 
@@ -116,7 +116,7 @@ impl Metal {
 }
 impl Reflect for Metal {
     fn reflect(v: Vec3, n: Vec3) -> Vec3 {
-        return v.copy() - 2.0 * v.dot(n.copy()) * n.copy();
+        v.copy() - 2.0 * v.dot(n.copy()) * n.copy()
     }
 }
 
@@ -124,7 +124,7 @@ impl Scatter for Metal {
     fn scatter(
         &self,
         r_in: &Ray,
-        rec: &Hit_record,
+        rec: &HitRecord,
         attenuation: &mut Color,
         scattered: &mut Ray,
     ) -> bool {
@@ -145,14 +145,14 @@ impl Scatter for Metal {
         //会冲突吗？
         //不会冲突，可以想想原理
         *attenuation = self.albedo.copy();
-        return scattered.direction().dot(rec.copy().normal) > 0.0;
+        scattered.direction().dot(rec.copy().normal) > 0.0
     }
 }
 pub fn fmin(a: f64, b: f64) -> f64 {
     if a < b {
         return a;
     }
-    return b;
+    b
 }
 
 pub fn refract(uv: Vec3, n: Vec3, etai_over_etat: f64) -> Vec3 {
@@ -161,16 +161,16 @@ pub fn refract(uv: Vec3, n: Vec3, etai_over_etat: f64) -> Vec3 {
     let r_out_parallel = -(Vec3::abs(1.0 - r_out_perp.length_squared())).sqrt() * n.copy();
     //eprintln!("test ratio: {}", etai_over_etat);
     //eprintln!("dot :{}", r_out_perp.dot(r_out_parallel.copy()));
-    return r_out_perp + r_out_parallel;
+    r_out_perp + r_out_parallel
 }
 
 pub struct Dielectric {
     pub ir: f64,
 }
 impl Dielectric {
-    pub fn dielectric() -> Dielectric {
-        Dielectric { ir: 0.0 }
-    }
+    //pub fn dielectric() -> Dielectric {
+    //    Dielectric { ir: 0.0 }
+    //}
     pub fn new(irr: f64) -> Dielectric {
         Dielectric { ir: irr }
     }
@@ -181,17 +181,17 @@ impl Dielectric {
         let mut r0 = (1.0 - ref_idx) / (1.0 + ref_idx);
         r0 = r0 * r0;
         let mut tmp = 1.0 - cosine;
-        for i in 0..4 {
-            tmp = tmp * (1.0 - cosine); //???
+        for _i in 0..4 {
+            tmp *= 1.0 - cosine; //???
         }
-        return r0 + (1.0 - r0) * tmp;
+        r0 + (1.0 - r0) * tmp
     } //??
 }
 impl Scatter for Dielectric {
     fn scatter(
         &self,
         r_in: &Ray,
-        rec: &Hit_record,
+        rec: &HitRecord,
         attenuation: &mut Color,
         scattered: &mut Ray,
     ) -> bool {
@@ -209,7 +209,7 @@ impl Scatter for Dielectric {
 
         let cannot_refract = refraction_ratio * sin_theta > 1.0;
 
-        let mut direction: Vec3;
+        let direction: Vec3; //?????don't have to be muttable
         if cannot_refract || Dielectric::reflectance(cos_theta, refraction_ratio) > random_double()
         {
             direction = Dielectric::reflect(unit_direction.copy(), rec.copy().normal);
@@ -222,11 +222,11 @@ impl Scatter for Dielectric {
         }
         //set_face normal那里可能有错误
         *scattered = Ray::new(rec.copy().p, direction.copy());
-        return true;
+        true
     }
 }
 impl Reflect for Dielectric {
     fn reflect(v: Vec3, n: Vec3) -> Vec3 {
-        return v.copy() - 2.0 * v.dot(n.copy()) * n.copy();
+        v.copy() - 2.0 * v.dot(n.copy()) * n.copy()
     }
 }

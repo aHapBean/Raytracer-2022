@@ -32,27 +32,29 @@ impl Camera {
         let viewport_height: f64 = 2.0 * h;
         let viewport_width: f64 = aspect_ratio * viewport_height as f64;
 
-        let W = Vec3::unit_vector(&(lookfrom.copy() - lookat.copy()));
-        let U = Vec3::unit_vector(&vup.cross(W.copy())); //???
-        let V = W.cross(U.copy()); //可能改错
+        let ww = Vec3::unit_vector(&(lookfrom.copy() - lookat.copy()));
+        let uu = Vec3::unit_vector(&vup.cross(ww.copy())); //???
+        let vv = ww.cross(uu.copy()); //可能改错
 
-        let Origin = lookfrom;
-        let Horizontal = focus_dist * viewport_width * U.copy();
-        let Vertical = focus_dist * viewport_height * V.copy();
-        let Lower_left_corner: Vec3 =
-            Origin.copy() - Horizontal.copy() / 2.0 - Vertical.copy() / 2.0 - focus_dist * W.copy();
+        let oorigin = lookfrom;
+        let hhorizontal = focus_dist * viewport_width * uu.copy();
+        let vvertical = focus_dist * viewport_height * vv.copy();
+        let llower_left_corner: Vec3 = oorigin.copy()
+            - hhorizontal.copy() / 2.0
+            - vvertical.copy() / 2.0
+            - focus_dist * ww.copy();
 
-        let Lens_radius = aperture / 2.0;
+        let llens_radius = aperture / 2.0;
 
         Camera {
-            origin: Origin,
-            horizontal: Horizontal,
-            vertical: Vertical,
-            lower_left_corner: Lower_left_corner,
-            u: U,
-            v: V,
-            w: W,
-            lens_radius: Lens_radius,
+            origin: oorigin,
+            horizontal: hhorizontal,
+            vertical: vvertical,
+            lower_left_corner: llower_left_corner,
+            u: uu,
+            v: vv,
+            w: ww,
+            lens_radius: llens_radius,
         }
     }
 
