@@ -76,19 +76,19 @@
 
 ## Task 0: Preparation
 
-- [ ] 在 `raytracer/Cargo.toml` 中，修改作者信息
-- [ ] 在 `LICENSE` 中，将作者修改为自己。你也可以换成其他许可证
-- [ ] 配置 Rust 环境
+- [x] 在 `raytracer/Cargo.toml` 中，修改作者信息
+- [x] 在 `LICENSE` 中，将作者修改为自己。你也可以换成其他许可证
+- [x] 配置 Rust 环境
   - 使用 [rustup](https://doc.rust-lang.org/book/ch01-01-installation.html) 安装 Rust。如果下载速度很慢，可以考虑使用 [SJTUG Mirror](https://mirrors.sjtug.sjtu.edu.cn) 的 rust-static 和 crates.io 镜像
   - 之后，你需要安装一些工具。首先，你需要定位到项目目录。而后，运行 `rustup component add clippy rustfmt`
   - 接着，运行 `make ci`。如果程序可以正常运行，那么环境就已经配置成功了
-- [ ] 配置 GitHub Action
+- [x] 配置 GitHub Action
   - 如果你的 Repo 直接使用题面模板
     - 那么在上述操作完成后，将库 push 到 GitHub 上。在 GitHub Action 中，“Lint and Test” 和 “Build and Upload” 都应当通过（该功能位于 Github Repo 网页上方项目名称旁的 Actions 选项卡）
     - 程序生成的结果会出现在 GitHub Action 的 Artifacts 中。`output` 文件夹下的内容应当是程序运行时生成的。对 output 文件夹的修改不应该被同步到 GitHub 上（参考 `.gitignore`）
   - 💠你也可以自己学习设计工作流程（可以参考题面 Repo `.github/workflows/cargo.yml`）
-- [ ] 最后，你可以把 `README.md` 中的教程部分删除，换成自己项目的描述、运行方法等信息
-- [ ] code review
+- [x] 最后，你可以把 `README.md` 中的教程部分删除，换成自己项目的描述、运行方法等信息
+- [x] code review
   - 运行题面 Demo 代码或 Hello World
   - GitHub Action 成功完成工作流程
   - 每位学生提交 GitHub Repo 链接
@@ -104,9 +104,9 @@
 
 为了快速上手语法，请使用 Rust 语言完成以下[力扣（LeetCode）网站](https://leetcode.cn/)练习：
 
-- [ ] [88. 合并两个有序数组](https://leetcode.cn/problems/merge-sorted-array/)
-- [ ] [2181. 合并零之间的节点](https://leetcode.cn/problems/merge-nodes-in-between-zeros/)
-- [ ] [94. 二叉树的中序遍历](https://leetcode.cn/problems/binary-tree-inorder-traversal/)
+- [x] [88. 合并两个有序数组](https://leetcode.cn/problems/merge-sorted-array/)
+- [x] [2181. 合并零之间的节点](https://leetcode.cn/problems/merge-nodes-in-between-zeros/)
+- [x] [94. 二叉树的中序遍历](https://leetcode.cn/problems/binary-tree-inorder-traversal/)
 - [ ] code review
   - Rust 基础语法特性掌握（范围不超出前 6 章与第 10.2 节）
 
@@ -114,7 +114,7 @@
 
 了解完 Rust 语法，就可以开始学习和动手实现 ray tracer 了！[***Ray Tracing in One Weekend - The Book Series***](https://raytracing.github.io) 是一套十分经典的教程，从原理和实践角度详细地阐释了 ray tracing 的基础知识，本项目便是基于该教程展开：
 
-- [ ] 学习 Ray Tracing book 1，使用 Rust 语言实现该部分程序，并渲染成果图
+- [x] 学习 Ray Tracing book 1，使用 Rust 语言实现该部分程序，并渲染成果图
 - [ ] 完成 Ray Tracing book 2，要求同上
 - [ ] 💠实现多线程渲染
 - [ ] code review
