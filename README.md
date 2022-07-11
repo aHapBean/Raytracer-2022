@@ -2,10 +2,10 @@
 
 # PPCA Raytracer 2022
 
-![GitHub top language](https://img.shields.io/github/languages/top/ACMClassCourse-2021/PPCA-Raytracer-2022)
-![License](https://img.shields.io/github/license/ACMClassCourse-2021/PPCA-Raytracer-2022)
-![GitHub repo size](https://img.shields.io/github/repo-size/ACMClassCourse-2021/PPCA-Raytracer-2022)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/ACMClassCourse-2021/PPCA-Raytracer-2022/CI)
+![GitHub top language](https://img.shields.io/github/languages/top/aHapBean/Raytracer-2022)
+![License](https://img.shields.io/github/license/aHapBean/Raytracer-2022)
+![GitHub repo size](https://img.shields.io/github/repo-size/aHapBean/Raytracer-2022)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/aHapBean/Raytracer-2022/CI)
 
 ## 课程介绍
 
