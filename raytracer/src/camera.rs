@@ -1,5 +1,6 @@
 use crate::mod_vec3::Cross;
 use crate::mod_vec3::Vec3; //mod 类似于一棵树
+use crate::random_double_range;
 use crate::ray::Ray;
 
 type Point3 = Vec3;
@@ -13,6 +14,8 @@ pub struct Camera {
     pub v: Vec3,
     pub w: Vec3,
     pub lens_radius: f64,
+    pub time0: f64,
+    pub time1: f64,
 }
 
 impl Camera {
@@ -24,6 +27,8 @@ impl Camera {
         aspect_ratio: f64,
         aperture: f64,
         focus_dist: f64,
+        _time0: f64,
+        _time1: f64,
     ) -> Camera {
         //let aspect_ratio = 16.0 / 9.0;
         let theta = crate::degree_to_radians(vfov);
@@ -55,6 +60,8 @@ impl Camera {
             v: vv,
             w: ww,
             lens_radius: llens_radius,
+            time0: _time0,
+            time1: _time1,
         }
     }
 
@@ -69,6 +76,7 @@ impl Camera {
                 + t * self.vertical.copy()
                 - self.origin.copy()
                 - offset.copy(),
+            tm: random_double_range(self.time0, self.time1),
         }
     }
 }

@@ -1,6 +1,7 @@
 //mod Vec3:
 use crate::random_double;
 use crate::random_double_range;
+use core::ops::{Index, IndexMut};
 use ops::Div;
 use ops::Mul;
 use std::ops;
@@ -165,6 +166,31 @@ impl Cross<Vec3> for Vec3 {
             self.z * t.x - self.x * t.z,
             self.x * t.y - self.y * t.x,
         )
+    }
+}
+
+//tag!
+impl Index<usize> for Vec3 {
+    type Output = f64;
+    fn index(&self, ind: usize) -> &Self::Output {
+        match ind {
+            0 => &self.x,
+            1 => &self.y,
+            2 => &self.z,
+            _ => panic!("Index out of bound"),
+        }
+    } //天才
+}
+
+impl IndexMut<usize> for Vec3 {
+    //type Output = Vec3;
+    fn index_mut(&mut self, ind: usize) -> &mut Self::Output {
+        match ind {
+            0 => &mut self.x,
+            1 => &mut self.y,
+            2 => &mut self.z,
+            _ => panic!("Index out of bound"),
+        }
     }
 }
 /*
