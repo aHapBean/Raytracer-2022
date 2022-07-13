@@ -1,4 +1,5 @@
 use crate::abs;
+use crate::fog::Isotropic;
 use crate::mod_vec3::Dot;
 use crate::mod_vec3::Vec3;
 use crate::random_int_range;

@@ -1,13 +1,15 @@
 use crate::aabb::AABB;
 use crate::random_int_range;
 use crate::ray::Ray;
-//use crate::sphere::bounding_box_for_sort_nothing;
+use crate::sphere::bounding_box_for_sort_nothing;
 use crate::sphere::Object;
+use crate::sphere::*;
 use crate::sphere::{BoundingBox, Hit};
 use crate::tool_func::unwrap_object;
 use crate::HitRecord;
 
 use crate::tool_func::*;
+use std::cmp::Ordering;
 
 //所有被hittable派生的都要加入object!!!
 //算上一种形状
@@ -26,6 +28,11 @@ impl BVH_node {
             right: unwrap_object(&self.right),
         }
     }
+    pub fn new_by_three(list: &mut HittableList, time0: f64, time1: f64) -> BVH_node {
+        let len = list.objects.len();
+        BVH_node::bvh_node(&mut list.objects, 0, len as u32, time0, time1)
+    }
+    //tag here 7.13 !
     pub fn bvh_node(
         src_objects: &mut Vec<Object>,
         start: u32,
@@ -33,37 +40,46 @@ impl BVH_node {
         time0: f64,
         time1: f64,
     ) -> BVH_node {
-        let objects = src_objects;
-        //tag!
-        //?????????????????????????????????????????????????????
-        let axis = random_int_range(0, 2);
-        //let tmp_x:
-        //let comparator = |x: &Object,y: &Object| {
-        //    f64::partial_cmp(
-        //
-        //    )
+        let objects: &mut Vec<Object> = src_objects;
+        //for object in src_objects {
+        //    objects.push(unwrap_object(object));
         //}
+
+        let axis = random_int_range(0, 2);
+
         let box_a = &mut AABB::aabb();
         let box_b = &mut AABB::aabb();
 
         //怎么解决？？
-        //let comparator = |x:&Object,y:&Object| {
-        //    f64::partial_cmp(
-        //        match x {
-        //            Object::None => &bounding_box_for_sort_nothing(box_a).min()[axis as usize],
-        //            Object::Sp(t) => &t.bounding_box_for_sort(0.0,0.0,box_a).min()[axis as usize],
-        //            Object::Msp(t) => &t.bounding_box_for_sort(0.0,0.0,box_a).min()[axis as usize],
-        //            Object::BV(t) => &t.bounding_box_for_sort(0.0,0.0,box_a).min()[axis as usize],
-        //        },
-        //        match y {
-        //            Object::None => &bounding_box_for_sort_nothing(box_b).min()[axis as usize],
-        //            Object::Sp(t) => &t.bounding_box_for_sort(0.0,0.0,box_b).min()[axis as usize],
-        //            Object::Msp(t) => &t.bounding_box_for_sort(0.0,0.0,box_b).min()[axis as usize],
-        //            Object::BV(t) => &t.bounding_box_for_sort(0.0,0.0,box_b).min()[axis as usize],
-        //        }
-        //    )
-        //    .unwrap()
-        //};
+        let comparator = |x: &Object, y: &Object| {
+            match x {
+                Object::None => bounding_box_for_sort_nothing(box_a),
+                Object::Sp(t) => t.bounding_box_for_sort(0.0, 0.0, box_a),
+                Object::Msp(t) => t.bounding_box_for_sort(0.0, 0.0, box_a),
+                Object::BV(t) => t.bounding_box_for_sort(0.0, 0.0, box_a),
+                Object::XY(t) => t.bounding_box_for_sort(0.0, 0.0, box_a),
+                Object::XZ(t) => t.bounding_box_for_sort(0.0, 0.0, box_a),
+                Object::YZ(t) => t.bounding_box_for_sort(0.0, 0.0, box_a),
+                Object::Bo(t) => t.bounding_box_for_sort(0.0, 0.0, box_a),
+                Object::Ro(t) => t.bounding_box_for_sort(0.0, 0.0, box_a),
+                Object::Tr(t) => t.bounding_box_for_sort(0.0, 0.0, box_a),
+                Object::Co(t) => t.bounding_box_for_sort(0.0, 0.0, box_a),
+            };
+            match y {
+                Object::None => bounding_box_for_sort_nothing(box_b),
+                Object::Sp(t) => t.bounding_box_for_sort(0.0, 0.0, box_b),
+                Object::Msp(t) => t.bounding_box_for_sort(0.0, 0.0, box_b),
+                Object::BV(t) => t.bounding_box_for_sort(0.0, 0.0, box_b),
+                Object::XY(t) => t.bounding_box_for_sort(0.0, 0.0, box_b),
+                Object::XZ(t) => t.bounding_box_for_sort(0.0, 0.0, box_b),
+                Object::YZ(t) => t.bounding_box_for_sort(0.0, 0.0, box_b),
+                Object::Bo(t) => t.bounding_box_for_sort(0.0, 0.0, box_b),
+                Object::Ro(t) => t.bounding_box_for_sort(0.0, 0.0, box_b),
+                Object::Tr(t) => t.bounding_box_for_sort(0.0, 0.0, box_b),
+                Object::Co(t) => t.bounding_box_for_sort(0.0, 0.0, box_b),
+            };
+            f64::partial_cmp(&(box_a.min()[axis as usize]), &(box_b.min()[axis as usize])).unwrap()
+        };
 
         let object_span: u32 = end - start;
 
@@ -75,7 +91,11 @@ impl BVH_node {
             rright = unwrap_object(&objects[start as usize]);
         } else if object_span == 2 {
             //to delete
-            if AABB::box_x_compare(&objects[start as usize], &objects[(start + 1) as usize]) {
+            if AABB::box_compare(
+                &objects[start as usize],
+                &objects[(start + 1) as usize],
+                axis,
+            ) {
                 lleft = unwrap_object(&objects[start as usize]);
                 rright = unwrap_object(&objects[(start + 1) as usize]);
             } else {
@@ -86,6 +106,8 @@ impl BVH_node {
             //sort(objects.begin() + start,objects.begin() + end,comparator);
 
             //objects.sort_unstable_by(comparator);
+            objects.sort_unstable_by(comparator);
+            //sort fuck !!!!!!!!!!!!
 
             let mid = (start + object_span) / 2;
             lleft = Object::BV(Box::new(BVH_node::bvh_node(
@@ -100,30 +122,15 @@ impl BVH_node {
         let box_right = &mut AABB::aabb();
 
         let mut ok = false;
-        ok = unwrap_object_bounding_box(&lleft, time0, time1, box_left);
-        ok = unwrap_object_bounding_box(&rright, time0, time1, box_right);
-        //match &lleft {
-        //    Object::None => eprintln!("bvh_node constructor false"),
-        //    Object::Sp(t) => ok = !t.bounding_box(time0, time1, box_left),
-        //    Object::Msp(t) => ok = !t.bounding_box(time0, time1, box_left),
-        //    Object::BV(t) => ok = !t.bounding_box(time0, time1, box_left),
-        //}
-        //match &rright {
-        //    Object::None => eprintln!("bvh_node constructor false"),
-        //    Object::Sp(t) => ok = !t.bounding_box(time0, time1, box_left),
-        //    Object::Msp(t) => ok = !t.bounding_box(time0, time1, box_left),
-        //    Object::BV(t) => ok = !t.bounding_box(time0, time1, box_left),
-        //}
+        ok = unwrap_object_bounding_box_no(&lleft, time0, time1, box_left);
+        ok = unwrap_object_bounding_box_no(&rright, time0, time1, box_right);
 
         if ok {
             eprintln!("No bounding box in bvh_node constructor.");
         }
-        //if !lleft.bounding_box(time0,time1,box_left) || !rright.bounding_box(time0,time1,box_right) {
-        //    eprintln!("No bounding box in bvh_node constructor.");
-        //}
 
         let bbox = AABB::surrounding_box(box_left.copy(), box_right.copy());
-
+        eprintln!("over here");
         BVH_node {
             boxx: bbox,
             left: lleft,

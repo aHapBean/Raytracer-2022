@@ -11,7 +11,25 @@ type Color = Vec3;
 type Point3 = Vec3;
 
 //这个!可能错吗？？？
-pub fn unwrap_object_bounding_box(ob: &Object, time0: f64, time1: f64, bo: &mut AABB) -> bool {
+pub fn unwrap_object_bounding_box_yes(ob: &Object, time0: f64, time1: f64, bo: &mut AABB) -> bool {
+    let mut ok = false;
+    match ob {
+        Object::None => eprintln!("bvh_node constructor false"),
+        Object::Sp(t) => ok = t.bounding_box(time0, time1, bo),
+        Object::Msp(t) => ok = t.bounding_box(time0, time1, bo),
+        Object::BV(t) => ok = t.bounding_box(time0, time1, bo),
+        Object::XY(t) => ok = t.bounding_box(time0, time1, bo),
+        Object::XZ(t) => ok = t.bounding_box(time0, time1, bo),
+        Object::YZ(t) => ok = t.bounding_box(time0, time1, bo),
+        Object::Bo(t) => ok = t.bounding_box(time0, time1, bo),
+        Object::Ro(t) => ok = t.bounding_box(time0, time1, bo),
+        Object::Tr(t) => ok = t.bounding_box(time0, time1, bo),
+        Object::Co(t) => ok = t.bounding_box(time0, time1, bo),
+    };
+    ok
+}
+
+pub fn unwrap_object_bounding_box_no(ob: &Object, time0: f64, time1: f64, bo: &mut AABB) -> bool {
     let mut ok = false;
     match ob {
         Object::None => eprintln!("bvh_node constructor false"),
@@ -19,6 +37,12 @@ pub fn unwrap_object_bounding_box(ob: &Object, time0: f64, time1: f64, bo: &mut 
         Object::Msp(t) => ok = !t.bounding_box(time0, time1, bo),
         Object::BV(t) => ok = !t.bounding_box(time0, time1, bo),
         Object::XY(t) => ok = !t.bounding_box(time0, time1, bo),
+        Object::XZ(t) => ok = !t.bounding_box(time0, time1, bo),
+        Object::YZ(t) => ok = !t.bounding_box(time0, time1, bo),
+        Object::Bo(t) => ok = !t.bounding_box(time0, time1, bo),
+        Object::Ro(t) => ok = !t.bounding_box(time0, time1, bo),
+        Object::Tr(t) => ok = !t.bounding_box(time0, time1, bo),
+        Object::Co(t) => ok = !t.bounding_box(time0, time1, bo),
     };
     ok
 }
@@ -30,6 +54,12 @@ pub fn unwrap_object_hit(ob: &Object, r: Ray, t_min: f64, t_max: f64, rec: &mut 
         Object::Msp(t) => ok = t.hit(r.copy(), t_min, t_max, rec),
         Object::BV(t) => ok = t.hit(r.copy(), t_min, t_max, rec),
         Object::XY(t) => ok = t.hit(r.copy(), t_min, t_max, rec),
+        Object::XZ(t) => ok = t.hit(r.copy(), t_min, t_max, rec),
+        Object::YZ(t) => ok = t.hit(r.copy(), t_min, t_max, rec),
+        Object::Bo(t) => ok = t.hit(r.copy(), t_min, t_max, rec),
+        Object::Ro(t) => ok = t.hit(r.copy(), t_min, t_max, rec),
+        Object::Tr(t) => ok = t.hit(r.copy(), t_min, t_max, rec),
+        Object::Co(t) => ok = t.hit(r.copy(), t_min, t_max, rec),
     }
     ok
 }
@@ -48,6 +78,7 @@ pub fn unwrap_material_scatter(
         Material::Met(material) => ok = material.scatter(r, &rec, attenuation, scattered),
         Material::Diel(material) => ok = material.scatter(r, &rec, attenuation, scattered),
         Material::Dif(material) => ok = material.scatter(r, &rec, attenuation, scattered),
+        Material::Iso(material) => ok = material.scatter(r, &rec, attenuation, scattered),
     };
     ok
 }
@@ -60,6 +91,7 @@ pub fn unwrap_material_emitted(mat: &Material, u: f64, v: f64, p: Point3) -> Col
         Material::Met(material) => res = material.emitted(u, v, p.copy()),
         Material::Diel(material) => res = material.emitted(u, v, p.copy()),
         Material::Dif(material) => res = material.emitted(u, v, p.copy()),
+        Material::Iso(material) => res = material.emitted(u, v, p.copy()),
     };
     res
 }
@@ -71,6 +103,12 @@ pub fn unwrap_object(ob: &Object) -> Object {
         Object::Msp(t) => Object::Msp(t.copy()),
         Object::BV(t) => Object::BV(Box::new(t.copy())), //tag!
         Object::XY(t) => Object::XY(t.copy()),
+        Object::XZ(t) => Object::XZ(t.copy()),
+        Object::YZ(t) => Object::YZ(t.copy()),
+        Object::Bo(t) => Object::Bo(Box::new(t.copy())),
+        Object::Ro(t) => Object::Ro(Box::new(t.copy())),
+        Object::Tr(t) => Object::Tr(Box::new(t.copy())),
+        Object::Co(t) => Object::Co(Box::new(t.copy())),
     }
 }
 //TAPL
@@ -81,6 +119,7 @@ pub fn unwrap_material(mat: &Material) -> Material {
         Material::Met(t) => Material::Met(t.copy()),
         Material::Diel(t) => Material::Diel(t.copy()),
         Material::Dif(t) => Material::Dif(t.copy()),
+        Material::Iso(t) => Material::Iso(t.copy()),
     }
 }
 

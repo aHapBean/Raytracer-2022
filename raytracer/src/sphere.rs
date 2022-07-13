@@ -1,15 +1,19 @@
+use crate::fog::ConstantMedium;
 use crate::mod_vec3::Vec3;
 use crate::ray::Ray;
+use crate::translate::RotateY;
 use core::f64::consts::PI;
 //trait也需要
 use crate::material::Material;
 use crate::mod_vec3::Dot;
 type Point3 = Vec3;
 use crate::aabb::AABB;
+use crate::boxx::*;
 use crate::bvh::*;
 use crate::moving_sphere::MovingSphere;
-use crate::rect::XYrect;
+use crate::rect::{XYrect, XZrect, YZrect};
 use crate::tool_func::*;
+use crate::translate::*;
 
 pub struct HitRecord {
     pub p: Point3,
@@ -189,10 +193,16 @@ pub enum Object {
     Msp(MovingSphere),
     BV(Box<BVH_node>),
     XY(XYrect),
+    XZ(XZrect),
+    YZ(YZrect),
+    Bo(Box<Boxx>),
+    Ro(Box<RotateY>),
+    Tr(Box<Translate>),
+    Co(Box<ConstantMedium>),
 }
 //pub fn Unwrap_Object_to_inner(ob:&Object) ->
 pub struct HittableList {
-    objects: Vec<Object>,
+    pub objects: Vec<Object>,
 }
 
 impl HittableList {
@@ -207,6 +217,13 @@ impl HittableList {
     //        objects: Vec::new(), //????
     //    }
     //}
+    pub fn copy(&self) -> HittableList {
+        let mut objects: Vec<Object> = vec![];
+        for object in &self.objects {
+            objects.push(unwrap_object(object));
+        }
+        HittableList { objects }
+    }
     pub fn clear(&mut self) {
         self.objects.clear();
     }
@@ -218,6 +235,12 @@ impl HittableList {
             Object::Msp(t) => self.objects.push(Object::Msp(t)),
             Object::BV(t) => self.objects.push(Object::BV(t)),
             Object::XY(t) => self.objects.push(Object::XY(t)),
+            Object::XZ(t) => self.objects.push(Object::XZ(t)),
+            Object::YZ(t) => self.objects.push(Object::YZ(t)),
+            Object::Bo(t) => self.objects.push(Object::Bo(t)),
+            Object::Ro(t) => self.objects.push(Object::Ro(t)),
+            Object::Tr(t) => self.objects.push(Object::Tr(t)),
+            Object::Co(t) => self.objects.push(Object::Co(t)),
         }; //神奇的用法
     }
 }
@@ -271,6 +294,60 @@ impl Hit for HittableList {
                                                 //*rec = temp_rec.copy();
                     }
                 }
+                Object::XZ(object) => {
+                    if object.copy().hit(r.copy(), t_min, closest_so_far, temp_rec) {
+                        //r.copy()!!!
+                        hit_anything = true;
+                        closest_so_far = temp_rec.copy().t;
+                        *rec = temp_rec.copy(); //????
+                                                //*rec = temp_rec.copy();
+                    }
+                }
+                Object::YZ(object) => {
+                    if object.copy().hit(r.copy(), t_min, closest_so_far, temp_rec) {
+                        //r.copy()!!!
+                        hit_anything = true;
+                        closest_so_far = temp_rec.copy().t;
+                        *rec = temp_rec.copy(); //????
+                                                //*rec = temp_rec.copy();
+                    }
+                }
+                Object::Bo(object) => {
+                    if object.copy().hit(r.copy(), t_min, closest_so_far, temp_rec) {
+                        //r.copy()!!!
+                        hit_anything = true;
+                        closest_so_far = temp_rec.copy().t;
+                        *rec = temp_rec.copy(); //????
+                                                //*rec = temp_rec.copy();
+                    }
+                }
+                Object::Ro(object) => {
+                    if object.copy().hit(r.copy(), t_min, closest_so_far, temp_rec) {
+                        //r.copy()!!!
+                        hit_anything = true;
+                        closest_so_far = temp_rec.copy().t;
+                        *rec = temp_rec.copy(); //????
+                                                //*rec = temp_rec.copy();
+                    }
+                }
+                Object::Tr(object) => {
+                    if object.copy().hit(r.copy(), t_min, closest_so_far, temp_rec) {
+                        //r.copy()!!!
+                        hit_anything = true;
+                        closest_so_far = temp_rec.copy().t;
+                        *rec = temp_rec.copy(); //????
+                                                //*rec = temp_rec.copy();
+                    }
+                }
+                Object::Co(object) => {
+                    if object.copy().hit(r.copy(), t_min, closest_so_far, temp_rec) {
+                        //r.copy()!!!
+                        hit_anything = true;
+                        closest_so_far = temp_rec.copy().t;
+                        *rec = temp_rec.copy(); //????
+                                                //*rec = temp_rec.copy();
+                    }
+                }
                 Object::None => (),
             }
         }
@@ -290,14 +367,8 @@ impl BoundingBox for HittableList {
 
         for object in &self.objects {
             //to change ! ! !
-            let mut ok = false;
-            match object {
-                Object::None => eprintln!("bounding box in HittableList false!"),
-                Object::Sp(some) => ok = some.bounding_box(time0, time1, temp_box),
-                Object::Msp(some) => ok = some.bounding_box(time0, time1, temp_box),
-                Object::BV(some) => ok = some.bounding_box(time0, time1, temp_box),
-                Object::XY(some) => ok = some.bounding_box(time0, time1, temp_box),
-            };
+            let mut ok = unwrap_object_bounding_box_yes(object, time0, time1, temp_box);
+
             if !ok {
                 return false;
             }

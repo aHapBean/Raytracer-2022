@@ -3,6 +3,7 @@ use crate::mod_vec3::Vec3;
 use crate::ray::Ray;
 use crate::sphere::HitRecord;
 //use std::ops::Mul;
+use crate::fog::*;
 use crate::random_double;
 use crate::texture::SolidColor;
 use crate::texture::Texture;
@@ -20,6 +21,7 @@ pub enum Material {
     Met(Metal),
     Diel(Dielectric),
     Dif(DiffuseLight),
+    Iso(Isotropic),
 }
 /*
 impl Material {

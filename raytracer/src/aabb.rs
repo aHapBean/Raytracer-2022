@@ -3,6 +3,7 @@ use crate::sphere::*;
 
 use crate::material::fmin;
 use crate::mod_vec3::Vec3;
+use crate::tool_func::unwrap_object_bounding_box_no;
 type Point3 = Vec3;
 
 pub struct AABB {
@@ -80,22 +81,8 @@ impl AABB {
         let box_a = &mut AABB::aabb();
         let box_b = &mut AABB::aabb();
 
-        let mut ok = false;
-        match a {
-            Object::None => eprintln!("bvh_node constructor false"),
-            Object::Sp(t) => ok = !t.bounding_box(0.0, 0.0, box_a),
-            Object::Msp(t) => ok = !t.bounding_box(0.0, 0.0, box_a),
-            Object::BV(t) => ok = !t.bounding_box(0.0, 0.0, box_a),
-            Object::XY(t) => ok = !t.bounding_box(0.0, 0.0, box_a),
-        }
-
-        match b {
-            Object::None => eprintln!("bvh_node constructor false"),
-            Object::Sp(t) => ok = !t.bounding_box(0.0, 0.0, box_b),
-            Object::Msp(t) => ok = !t.bounding_box(0.0, 0.0, box_b),
-            Object::BV(t) => ok = !t.bounding_box(0.0, 0.0, box_b),
-            Object::XY(t) => ok = !t.bounding_box(0.0, 0.0, box_b),
-        }
+        let mut ok = unwrap_object_bounding_box_no(b, 0.0, 0.0, box_a);
+        ok = unwrap_object_bounding_box_no(b, 0.0, 0.0, box_b);
 
         if ok {
             eprintln!("No bounding box in bvh_node constructor.");
