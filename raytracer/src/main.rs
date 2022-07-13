@@ -329,7 +329,7 @@ fn random_scene() -> HittableList {
 fn earth() -> HittableList {
     //这个texture的所有权按道理在构造函数里面的可以直接给出，写复杂了一些些
     let mut world: HittableList = HittableList::hittablelist();
-    eprintln!("here 1");
+    //eprintln!("here 1");
     let earth_texture = Texture::Im(ImageTexture::new("image/earthmap.jpg".to_string()));
     let earth_surface = Material::Lam(Lambertian::new(&earth_texture));
     let globe = Object::Sp(Sphere::new(Point3::new(0.0, 0.0, 0.0), 2.0, earth_surface));
@@ -370,7 +370,7 @@ fn main() {
     //let pi: f64 = 3.1415926535897932385;
     //Image
     let aspect_ratio: f64 = 16.0 / 9.0;
-    let image_width: f64 = 480.0; //??
+    let image_width: f64 = 400.0; //??
     let image_height: f64 = image_width as f64 / aspect_ratio;
 
     let height = image_height;
@@ -442,7 +442,7 @@ fn main() {
         1.0,
     );
 
-    let samples_per_pixel = 500;
+    let samples_per_pixel = 50;
     let max_depth = 50;
 
     println!(
