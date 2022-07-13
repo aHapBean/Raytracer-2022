@@ -196,7 +196,7 @@ impl Perlin {
     fn perlin_generate_perm(point_count: u32) -> Vec<i32> {
         let mut p: Vec<i32> = vec![];
         //???这里复制是否会降低我的速度？？
-        eprintln!("rethink the copy!!");
+        //eprintln!("rethink the copy!!");
         for i in 0..point_count {
             p.push(i as i32);
         }

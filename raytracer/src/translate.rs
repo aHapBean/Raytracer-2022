@@ -16,6 +16,8 @@ pub struct Translate {
 impl Translate {
     pub fn new(p: &Object, displacement: Vec3) -> Translate {
         //eprintln!("the tr offset:{}",displacement[0]);
+        //eprintln!("dis:{:#?}",displacement);
+
         Translate {
             ptr: unwrap_object(p),
             offset: displacement,
@@ -35,6 +37,7 @@ impl Hit for Translate {
             r.direction().copy(),
             r.time(),
         );
+
         if !unwrap_object_hit(&self.ptr, moved_r.copy(), t_min, t_max, rec) {
             return false;
         }
@@ -79,8 +82,10 @@ impl RotateY {
         let cos_theta = radians.cos();
 
         let bbbox = &mut AABB::aabb();
+        //eprintln!("bbbox.min[0] :{}", bbbox.max()[0]);
         let hasbox = unwrap_object_bounding_box_yes(p, 0.0, 1.0, bbbox);
         //if hasbox {eprintln!("there is a box!");}
+        //eprintln!("post bbbox.min[0] :{}", bbbox.max()[0]);
         //else {eprintln!("there is not a box!");}
         //eprintln!("run rotate!");
         let mut min = Point3::new(INFINITY, INFINITY, INFINITY);
@@ -89,6 +94,7 @@ impl RotateY {
         for i in 0..2 {
             for j in 0..2 {
                 for k in 0..2 {
+                    //eprintln!("bbbox.min[0] :{}",bbbox.max()[0]);
                     let x = i as f64 * bbbox.max().x() + (1 - i) as f64 * bbbox.min().x();
                     let y = j as f64 * bbbox.max().y() + (1 - j) as f64 * bbbox.min().y();
                     let z = k as f64 * bbbox.max().z() + (1 - k) as f64 * bbbox.min().z();
@@ -97,7 +103,9 @@ impl RotateY {
                     let newz = -sin_theta * x + cos_theta * z;
                     //eprintln!("x:{},newx:{}",x,newx);
                     let tester = Vec3::new(newx, y, newz);
+
                     for c in 0..3 {
+                        //eprintln!("min[c]:{} tester[c]:{}",max[c],tester[c]);
                         min[c] = fmin(min[c], tester[c]);
                         max[c] = fmax(max[c], tester[c]);
                     }
@@ -105,17 +113,22 @@ impl RotateY {
                 }
             }
         }
-
+        let ss = sin_theta;
+        let cc = cos_theta;
+        let has = hasbox;
         //*bbbox = AABB::new(min,max);
         //???
+        //eprintln!("{:#?}", min);
+        //eprintln!("{:#?}", max);
         RotateY {
             ptr: unwrap_object(p),
-            sin_theta,
-            cos_theta,
-            hasbox,
+            sin_theta: ss,
+            cos_theta: cc,
+            hasbox: has,
             bbox: AABB::new(min, max),
         }
     }
+
     pub fn copy(&self) -> RotateY {
         RotateY {
             ptr: unwrap_object(&self.ptr),
@@ -140,10 +153,13 @@ impl Hit for RotateY {
 
         let rotated_r = Ray::new(origin.copy(), direction.copy(), r.time());
 
-        if !unwrap_object_hit(&self.ptr, r.copy(), t_min, t_max, rec) {
+        if !unwrap_object_hit(&self.ptr, rotated_r.copy(), t_min, t_max, rec) {
             return false;
         }
+        //fuck you!
 
+        //fuck youuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu!
+        //eprintln!("hit here!");
         let mut p = rec.p.copy();
         let mut normal = rec.normal.copy();
 

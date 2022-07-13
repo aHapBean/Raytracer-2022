@@ -377,7 +377,7 @@ fn cornell_box() -> HittableList {
         0.12, 0.45, 0.15,
     )))));
 
-    let light = Material::Dif(DiffuseLight::new(Color::new(15.0, 15.0, 15.0)));
+    let light = Material::Dif(DiffuseLight::new(Color::new(30.0, 30.0, 30.0)));
 
     world.add(Object::YZ(YZrect::new(
         0.0, 555.0, 0.0, 555.0, 555.0, &green,
@@ -399,8 +399,8 @@ fn cornell_box() -> HittableList {
         Point3::new(165.0, 330.0, 165.0),
         &white,
     )));
-    let box2 = Object::Ro(Box::new(RotateY::new(&box1, 30.0)));
-    //let box1 = Objec::
+    let box2 = Object::Ro(Box::new(RotateY::new(&box1, 15.0)));
+    //let box2 = Objec::
     let box3 = Object::Tr(Box::new(Translate::new(
         &box2,
         Vec3::new(265.0, 0.0, 295.0),
@@ -413,12 +413,13 @@ fn cornell_box() -> HittableList {
     //    Point3::new(295.0, 165.0, 230.0),
     //    &white,
     //))));
+
     let box2 = Object::Bo(Box::new(Boxx::new(
         Point3::new(0.0, 0.0, 0.0),
         Point3::new(165.0, 165.0, 165.0),
         &white,
     )));
-    let box2 = Object::Ro(Box::new(RotateY::new(&box2, -30.0)));
+    let box2 = Object::Ro(Box::new(RotateY::new(&box2, -18.0)));
     let box2 = Object::Tr(Box::new(Translate::new(&box2, Vec3::new(130.0, 0.0, 65.0))));
     world.add(box2);
     //world.add(Object::Bo(Box::new(Boxx::new(
@@ -517,12 +518,12 @@ fn final_scene() -> HittableList {
     }
 
     let mut objects = HittableList::hittablelist();
-    //objects.add(Object::BV(Box::new(BVH_node::new_by_three(
-    //    &mut boxesl,
-    //    0.0,
-    //    1.0,
-    //))));
-    //
+    objects.add(Object::BV(Box::new(BVH_node::new_by_three(
+        &mut boxesl,
+        0.0,
+        1.0,
+    ))));
+
     let light = Material::Dif(DiffuseLight::new(Color::new(7.0, 7.0, 7.0)));
     objects.add(Object::XZ(XZrect::new(
         123.0, 423.0, 147.0, 412.0, 554.0, &light,
@@ -606,42 +607,31 @@ fn final_scene() -> HittableList {
         )))));
         boxes2.add(Object::Sp(Sphere::new(
             Point3::random_range(0.0, 165.0),
-            20.0,
+            10.0,
             white,
         )));
     }
 
-    //objects.add(Object::Tr(Box::new(Translate::new(
-    //    &Object::Ro(Box::new(RotateY::new(
-    //        &Object::BV(Box::new(BVH_node::new_by_three(&mut boxes2, 0.0, 1.0))),
-    //        15.0,
-    //    ))),
-    //    Vec3::new(-100.0, 270.0, 395.0),
-    //))));
+    objects.add(Object::Tr(Box::new(Translate::new(
+        &Object::Ro(Box::new(RotateY::new(
+            &Object::BV(Box::new(BVH_node::new_by_three(&mut boxes2, 0.0, 1.0))),
+            15.0,
+        ))),
+        Vec3::new(-100.0, 270.0, 395.0),
+    ))));
+
     objects
 }
 fn main() {
     print!("{}[2J", 27 as char); // Clear screen
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char); // Set cursor position as 1,1
-
-    // to preserve the None
-    //let sph = Object::None;
-
-    //sph.cope();
-
-    //my code
-    //let pi: f64 = 3.1415926535897932385;
-    //Image
+                                                    //Image
     let mut aspect_ratio: f64 = 16.0 / 9.0;
     let mut image_width: f64 = 400.0;
     let mut image_height: f64 = image_width as f64 / aspect_ratio;
 
     //world
-    //for 2 balls;
     let mut world: HittableList;
-    //let tp = world;
-    //let mut world = random_scene();
-    //let R = (pi / 4.0).cos();
 
     let lookfrom;
     let lookat;
@@ -668,14 +658,12 @@ fn main() {
         lookat = Point3::new(0.0, 0.0, 0.0);
         vfov = 20.0;
     } else if flag == 3 {
-        //eprintln!("here 1");
         world = two_perlin_spheres();
         background = Color::new(0.7, 0.8, 1.00);
         lookfrom = Point3::new(13.0, 2.0, 3.0);
         lookat = Point3::new(0.0, 0.0, 0.0);
         vfov = 20.0;
     } else if flag == 4 {
-        //eprintln!("here 1");
         world = earth();
         background = Color::new(0.7, 0.8, 1.00);
         lookfrom = Point3::new(13.0, 2.0, 3.0);
@@ -683,7 +671,6 @@ fn main() {
         vfov = 20.0;
     } else if flag == 5 {
         world = simple_light();
-        //samples_per
         background = Color::new(0.0, 0.0, 0.0);
         lookfrom = Point3::new(26.0, 3.0, 6.0);
         lookat = Point3::new(0.0, 2.0, 0.0);
@@ -691,7 +678,7 @@ fn main() {
     } else if flag == 6 {
         world = cornell_box();
         aspect_ratio = 1.0;
-        image_width = 320.0;
+        image_width = 480.0;
         image_height = image_width / aspect_ratio;
         samples_per_pixel = 200;
         background = Color::new(0.0, 0.0, 0.0);
@@ -712,7 +699,7 @@ fn main() {
         aspect_ratio = 1.0;
         image_width = 400.0;
         image_height = image_width / aspect_ratio;
-        samples_per_pixel = 50;
+        samples_per_pixel = 200;
         lookfrom = Point3::new(478.0, 278.0, -600.0);
         lookat = Point3::new(278.0, 278.0, 0.0);
         vfov = 40.0;
@@ -787,7 +774,7 @@ fn main() {
             progress.inc(1);
         }
     }
-    world.clear(); //??
+    world.clear();
     progress.finish();
 
     // Output image to file

@@ -51,6 +51,7 @@ impl Hit for Boxx {
 impl BoundingBox for Boxx {
     fn bounding_box(&self, time0: f64, time1: f64, output_Boxx: &mut AABB) -> bool {
         *output_Boxx = AABB::new(self.box_min.copy(), self.box_max.copy());
+        //eprintln!("bbbox对的.min[0] :{}", output_Boxx.max()[0]);
         true
     }
     fn bounding_box_for_sort(&self, time0: f64, time1: f64, output_Boxx: &mut AABB) -> AABB {

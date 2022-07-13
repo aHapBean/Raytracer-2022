@@ -13,7 +13,6 @@ use std::cmp::Ordering;
 
 //所有被hittable派生的都要加入object!!!
 //算上一种形状
-
 pub struct BVH_node {
     pub boxx: AABB, //tag!
     pub left: Object,
@@ -28,6 +27,7 @@ impl BVH_node {
             right: unwrap_object(&self.right),
         }
     }
+
     pub fn new_by_three(list: &mut HittableList, time0: f64, time1: f64) -> BVH_node {
         let len = list.objects.len();
         BVH_node::bvh_node(&mut list.objects, 0, len as u32, time0, time1)
@@ -109,7 +109,8 @@ impl BVH_node {
             objects.sort_unstable_by(comparator);
             //sort fuck !!!!!!!!!!!!
 
-            let mid = (start + object_span) / 2;
+            let mid = start + object_span / 2;
+            //f*** you!
             lleft = Object::BV(Box::new(BVH_node::bvh_node(
                 objects, start, mid, time0, time1,
             )));
@@ -130,7 +131,7 @@ impl BVH_node {
         }
 
         let bbox = AABB::surrounding_box(box_left.copy(), box_right.copy());
-        eprintln!("over here");
+        //eprintln!("over here");
         BVH_node {
             boxx: bbox,
             left: lleft,
