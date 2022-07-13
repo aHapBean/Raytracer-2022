@@ -370,12 +370,14 @@ fn main() {
     //let pi: f64 = 3.1415926535897932385;
     //Image
     let aspect_ratio: f64 = 16.0 / 9.0;
-    let image_width: f64 = 480.0; //??
+
+    let image_width: f64 = 400.0; //??
+    //let image_width: f64 = 2400.0; //??
     let image_height: f64 = image_width as f64 / aspect_ratio;
 
     let height = image_height;
     let width = image_width;
-    let quality = 60; // From 0 to 100
+    let quality = 100; // From 0 to 100
     let path = "output/output.jpg";
 
     //world
@@ -442,7 +444,7 @@ fn main() {
         1.0,
     );
 
-    let samples_per_pixel = 500;
+    let samples_per_pixel = 50;
     let max_depth = 50;
 
     println!(
