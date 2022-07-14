@@ -725,9 +725,9 @@ fn main() {
     } else {
         world = final_scene();
         aspect_ratio = 1.0;
-        image_width = 240.0;
+        image_width = 800.0;
         image_height = image_width / aspect_ratio;
-        samples_per_pixel = 10;
+        samples_per_pixel = 50;
         lookfrom = Point3::new(478.0, 278.0, -600.0);
         lookat = Point3::new(278.0, 278.0, 0.0);
         background = Color::new(0.0, 0.0, 0.0);
