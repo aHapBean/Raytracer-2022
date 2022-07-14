@@ -506,7 +506,7 @@ fn final_scene() -> HittableList {
     let ground = Material::Lam(Lambertian::new(&Texture::So(SolidColor::new(Color::new(
         0.48, 0.83, 0.53,
     )))));
-
+    let mut objects = HittableList::hittablelist();
     let boxes_per_side = 20;
     for i in 0..boxes_per_side {
         for j in 0..boxes_per_side {
@@ -518,20 +518,25 @@ fn final_scene() -> HittableList {
             let y1 = random_double_range(1.0, 101.0);
             let z1 = z0 + w;
 
-            boxesl.add(Object::Bo(Box::new(Boxx::new(
+            objects.add(Object::Bo(Box::new(Boxx::new(
                 Point3::new(x0, y0, z0),
                 Point3::new(x1, y1, z1),
                 &ground,
             ))));
+            //boxesl.add(Object::Bo(Box::new(Boxx::new(
+            //    Point3::new(x0, y0, z0),
+            //    Point3::new(x1, y1, z1),
+            //    &ground,
+            //))));
         }
     }
 
-    let mut objects = HittableList::hittablelist();
-    objects.add(Object::BV(Box::new(BVH_node::new_by_three(
-        &mut boxesl,
-        0.0,
-        1.0,
-    ))));
+    //let mut objects = HittableList::hittablelist();
+    //objects.add(Object::BV(Box::new(BVH_node::new_by_three(
+    //    &mut boxesl,
+    //    0.0,
+    //    1.0,
+    //))));
 
     let light = Material::Dif(DiffuseLight::new(Color::new(7.0, 7.0, 7.0)));
     objects.add(Object::XZ(XZrect::new(
@@ -614,20 +619,25 @@ fn final_scene() -> HittableList {
         let white = Material::Lam(Lambertian::new(&Texture::So(SolidColor::new(Color::new(
             0.73, 0.73, 0.73,
         )))));
-        boxes2.add(Object::Sp(Sphere::new(
+        //boxes2.add(Object::Sp(Sphere::new(
+        //    Point3::random_range(0.0, 165.0),
+        //    10.0,
+        //    white,
+        //)));
+        objects.add(Object::Sp(Sphere::new(
             Point3::random_range(0.0, 165.0),
             10.0,
             white,
         )));
     }
 
-    objects.add(Object::Tr(Box::new(Translate::new(
-        &Object::Ro(Box::new(RotateY::new(
-            &Object::BV(Box::new(BVH_node::new_by_three(&mut boxes2, 0.0, 1.0))),
-            15.0,
-        ))),
-        Vec3::new(-100.0, 270.0, 395.0),
-    ))));
+    //objects.add(Object::Tr(Box::new(Translate::new(
+    //    &Object::Ro(Box::new(RotateY::new(
+    //        &Object::BV(Box::new(BVH_node::new_by_three(&mut boxes2, 0.0, 1.0))),
+    //        15.0,
+    //    ))),
+    //    Vec3::new(-100.0, 270.0, 395.0),
+    //))));
 
     objects
 }

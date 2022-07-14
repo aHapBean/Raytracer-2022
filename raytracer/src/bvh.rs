@@ -111,11 +111,30 @@ impl BVH_node {
 
             let mid = start + object_span / 2;
             //f*** you!
+
+            let mut obl: &mut Vec<Object> = &mut vec![];
+            for i in start..mid {
+                obl.push(unwrap_object(&objects[i as usize]));
+            }
+
+            let mut obr: &mut Vec<Object> = &mut vec![];
+            for i in mid..end {
+                obr.push(unwrap_object(&objects[i as usize]));
+            }
+
             lleft = Object::BV(Box::new(BVH_node::bvh_node(
-                objects, start, mid, time0, time1,
+                obl,
+                0,
+                mid - start,
+                time0,
+                time1,
             )));
             rright = Object::BV(Box::new(BVH_node::bvh_node(
-                objects, mid, end, time0, time1,
+                obr,
+                0,
+                end - mid,
+                time0,
+                time1,
             )));
         }
 
