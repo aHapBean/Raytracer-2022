@@ -58,6 +58,15 @@ use crate::boxx::*;
 use crate::tool_func::*;
 use crate::translate::*;
 
+use indicatif::MultiProgress;
+pub use std::{
+    //fs::File,
+    //process::exit,
+    sync::{mpsc, Arc},
+    thread,
+    time::Instant,
+};
+
 type Color = Vec3;
 type Point3 = Vec3;
 fn abs(a: f64) -> f64 {
@@ -352,19 +361,19 @@ fn simple_light() -> HittableList {
         Material::Lam(Lambertian::new(&Texture::No(pertext.copy()))),
     )));
 
-    let difflight = Material::Dif(DiffuseLight::new(Color::new(4.0, 4.0, 4.0)));
+    let difflight = Material::Dif(DiffuseLight::new(Color::new(6.0, 6.0, 6.0)));
     world.add(Object::XY(XYrect::new(
         3.0, 5.0, 1.0, 3.0, -2.0, &difflight,
     )));
-    let difflight = Material::Dif(DiffuseLight::new(Color::new(4.0, 4.0, 4.0)));
+
+    let difflight = Material::Dif(DiffuseLight::new(Color::new(6.0, 6.0, 6.0)));
     world.add(Object::Sp(Sphere::new(
-        Point3::new(0.0, 6.0, 0.0),
-        2.0,
+        Point3::new(-3.0, 1.5, 1.0),
+        1.5,
         difflight,
     )));
     world
 }
-
 fn cornell_box() -> HittableList {
     let mut world = HittableList::hittablelist();
     let red = Material::Lam(Lambertian::new(&Texture::So(SolidColor::new(Color::new(
@@ -625,7 +634,20 @@ fn final_scene() -> HittableList {
 fn main() {
     print!("{}[2J", 27 as char); // Clear screen
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char); // Set cursor position as 1,1
-                                                    //Image
+    println!(
+        "\n         {}    {}\n",
+        style("zxd's Ray Tracer").cyan(),
+        style(format!("v{}", env!("CARGO_PKG_VERSION"))).yellow(),
+    );
+    println!(
+        "{} 💿 {}",
+        style("[1/5]").bold().dim(),
+        style("Initlizing...").green()
+    );
+    let begin_time = Instant::now();
+    const THREAD_NUMBER: usize = 7;
+
+    //Image
     let mut aspect_ratio: f64 = 16.0 / 9.0;
     let mut image_width: f64 = 400.0;
     let mut image_height: f64 = image_width as f64 / aspect_ratio;
@@ -639,11 +661,11 @@ fn main() {
     let vfov: f64;
     let dist_to_focus = 10.0;
     let mut aperture = 0.1;
-    let mut background: Color = Color::new(0.0, 0.0, 0.0);
+    let background: Color;
     let mut samples_per_pixel = 50;
     let max_depth = 50;
 
-    let flag: i32 = 8;
+    let flag: i32 = 9;
     if flag == 1 {
         world = random_scene();
         background = Color::new(0.70, 0.80, 1.00);
@@ -674,11 +696,16 @@ fn main() {
         background = Color::new(0.0, 0.0, 0.0);
         lookfrom = Point3::new(26.0, 3.0, 6.0);
         lookat = Point3::new(0.0, 2.0, 0.0);
+        samples_per_pixel = 400;
+        image_width = 800.0;
+        aspect_ratio = 16.0 / 9.0;
+        image_height = image_width / aspect_ratio;
         vfov = 20.0;
     } else if flag == 6 {
         world = cornell_box();
         aspect_ratio = 1.0;
-        image_width = 480.0;
+        image_width = 1200.0; //change here !
+
         image_height = image_width / aspect_ratio;
         samples_per_pixel = 200;
         background = Color::new(0.0, 0.0, 0.0);
@@ -693,22 +720,24 @@ fn main() {
         image_height = image_width / aspect_ratio;
         lookfrom = Vec3::new(278.0, 278.0, -800.0);
         lookat = Vec3::new(278.0, 278.0, 0.0);
+        background = Color::new(0.0, 0.0, 0.0);
         vfov = 40.0;
     } else {
         world = final_scene();
         aspect_ratio = 1.0;
-        image_width = 400.0;
+        image_width = 240.0;
         image_height = image_width / aspect_ratio;
-        samples_per_pixel = 200;
+        samples_per_pixel = 10;
         lookfrom = Point3::new(478.0, 278.0, -600.0);
         lookat = Point3::new(278.0, 278.0, 0.0);
+        background = Color::new(0.0, 0.0, 0.0);
         vfov = 40.0;
     }
 
     let cam: Camera = Camera::camera(
-        lookfrom,
-        lookat,
-        vup,
+        lookfrom.copy(),
+        lookat.copy(),
+        vup.copy(),
         vfov,
         aspect_ratio,
         aperture,
@@ -719,7 +748,7 @@ fn main() {
 
     let height = image_height;
     let width = image_width;
-    let quality = 100; // From 0 to 100
+    let quality = 50; // From 0 to 100
     let path = "output/output.jpg";
 
     println!(
@@ -742,7 +771,175 @@ fn main() {
         .progress_chars("#>-"));
 
     // Generate image
-    for j in 0..height as usize {
+
+    println!(
+        "{} 🚀 {} {} {}",
+        style("[2/5]").bold().dim(),
+        style("Rendering with").green(),
+        style((THREAD_NUMBER + 2).to_string()).yellow(),
+        style("Threads...").green(),
+    );
+
+    let SECTION_LINE_NUM: usize = (image_height as usize) / (THREAD_NUMBER * 4);
+    let mut output_pixel_color = Vec::<Color>::new();
+    let mut thread_pool = Vec::<_>::new();
+    let multiprogress = Arc::new(MultiProgress::new());
+    multiprogress.set_move_cursor(true); // turn on this to reduce flickering
+
+    for thread_id in 0..(THREAD_NUMBER + 2) {
+        let line_beg = match thread_id {
+            0 => 0,
+            1 => SECTION_LINE_NUM * 6,
+            2 => SECTION_LINE_NUM * 8,
+            3 => SECTION_LINE_NUM * 10,
+            4 => SECTION_LINE_NUM * 12,
+            5 => SECTION_LINE_NUM * 13,
+            6 => SECTION_LINE_NUM * 14,
+            7 => SECTION_LINE_NUM * 15,
+            _ => SECTION_LINE_NUM * 16,
+        };
+        let line_end = match thread_id {
+            0 => SECTION_LINE_NUM * 6,
+            1 => SECTION_LINE_NUM * 8,
+            2 => SECTION_LINE_NUM * 10,
+            3 => SECTION_LINE_NUM * 12,
+            4 => SECTION_LINE_NUM * 13,
+            5 => SECTION_LINE_NUM * 14,
+            6 => SECTION_LINE_NUM * 15,
+            7 => SECTION_LINE_NUM * 16,
+            _ => image_height as usize,
+        };
+
+        let world = world.copy();
+
+        let cam: Camera = Camera::camera(
+            lookfrom.copy(),
+            lookat.copy(),
+            vup.copy(),
+            vfov,
+            aspect_ratio,
+            aperture,
+            dist_to_focus,
+            0.0,
+            1.0,
+        );
+
+        let mp = multiprogress.clone();
+        let progress_bar = mp.add(ProgressBar::new(
+            ((line_end - line_beg) * (image_width as usize)) as u64,
+        ));
+        progress_bar.set_style(ProgressStyle::default_bar()
+        .template("{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] [{pos}/{len}] ({eta})")
+        .progress_chars("#>-"));
+
+        let (tx, rx) = mpsc::channel();
+
+        let back = background.copy();
+        thread_pool.push((
+            thread::spawn(move || {
+                let mut progress = 0;
+                progress_bar.set_position(0);
+
+                let channel_send = tx;
+
+                let mut section_pixel_color = Vec::<Color>::new();
+
+                //let mut rnd = rand::thread_rng();
+
+                for y in line_beg..line_end {
+                    for x in 0..image_width as usize {
+                        let mut pixel_color = Color::new(0.0, 0.0, 0.0);
+                        for _i in 0..samples_per_pixel {
+                            let u = (x as f64 + random_double()) / (image_width - 1.0) as f64;
+                            let v = (y as f64 + random_double()) / (image_height - 1.0) as f64;
+                            let ray = cam.get_ray(u, v);
+                            let back = back.copy();
+                            pixel_color =
+                                pixel_color.copy() + ray_color(&ray, back, &world, max_depth);
+                        }
+                        section_pixel_color.push(pixel_color);
+
+                        progress += 1;
+                        progress_bar.set_position(progress);
+                    }
+                }
+                channel_send.send(section_pixel_color).unwrap();
+                progress_bar.finish_with_message("Finished.");
+                //println!("rust says {}", capture);
+            }),
+            rx,
+        ));
+    }
+    // 等待所有线程结束
+    multiprogress.join().unwrap();
+
+    //========================================================
+
+    println!(
+        "{} 🚛 {}",
+        style("[3/5]").bold().dim(),
+        style("Collecting Threads Results...").green(),
+    );
+
+    //let mut thread_finish_successfully = true;
+    let collecting_progress_bar = ProgressBar::new((THREAD_NUMBER + 2) as u64);
+    // join 和 recv 均会阻塞主线程
+    for thread_id in 0..(THREAD_NUMBER + 2) {
+        let thread = thread_pool.remove(0);
+        match thread.0.join() {
+            Ok(_) => {
+                let mut received = thread.1.recv().unwrap();
+                output_pixel_color.append(&mut received);
+                collecting_progress_bar.inc(1);
+            }
+            Err(_) => {
+                //thread_finish_successfully = false;
+                println!(
+                    "      ⚠️ {}{}{}",
+                    style("Joining the ").red(),
+                    style(thread_id.to_string()).yellow(),
+                    style("th thread failed!").red(),
+                );
+            }
+        }
+    }
+
+    collecting_progress_bar.finish_and_clear();
+
+    println!(
+        "{} 🏭 {}",
+        style("[4/5]").bold().dim(),
+        style("Generating Image...").green()
+    );
+
+    let mut pixel_id = 0;
+
+    for y in 0..image_height as u32 {
+        for x in 0..image_width as u32 {
+            //let pixel_color = output_pixel_color[pixel_id].calc_color(samples_per_pixel);
+            let mut r = output_pixel_color[pixel_id].copy().x;
+            let mut g = output_pixel_color[pixel_id].copy().y;
+            let mut b = output_pixel_color[pixel_id].copy().z;
+
+            let scale = 1.0 / samples_per_pixel as f64;
+            r = (r * scale).sqrt();
+            g = (g * scale).sqrt();
+            b = (b * scale).sqrt();
+
+            let pixel_color = [
+                (256.0 * clamp(r, 0.0, 0.999)) as u8,
+                (256.0 * clamp(g, 0.0, 0.999)) as u8,
+                (256.0 * clamp(b, 0.0, 0.999)) as u8,
+            ];
+
+            let pixel = img.get_pixel_mut(x, (image_height - y as f64 - 1.0) as u32);
+            *pixel = image::Rgb(pixel_color);
+
+            pixel_id += 1;
+        }
+    }
+
+    /*for j in 0..height as usize {
         for i in 0..width as usize {
             let mut my_pixel_color = Color::new(0.0, 0.0, 0.0);
             for _s in 0..samples_per_pixel {
@@ -773,7 +970,7 @@ fn main() {
             *pixel = image::Rgb(pixel_color);
             progress.inc(1);
         }
-    }
+    }*/
     world.clear();
     progress.finish();
 
