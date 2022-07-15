@@ -18,6 +18,10 @@
 # 当前进度
 - 目前已完成第二本书，正在运行多线程最终效果图
 
+- 最终作品
+
+![](image/final_zp.jpg)
+
 - 当前效果图
   - 初步图
   
@@ -76,7 +80,7 @@
 - [x] [88. 合并两个有序数组](https://leetcode.cn/problems/merge-sorted-array/)
 - [x] [2181. 合并零之间的节点](https://leetcode.cn/problems/merge-nodes-in-between-zeros/)
 - [x] [94. 二叉树的中序遍历](https://leetcode.cn/problems/binary-tree-inorder-traversal/)
-- [ ] code review
+- [x] code review
   - Rust 基础语法特性掌握（范围不超出前 6 章与第 10.2 节）
 
 ## Task 2: Shoot the Light
@@ -84,9 +88,9 @@
 了解完 Rust 语法，就可以开始学习和动手实现 ray tracer 了！[***Ray Tracing in One Weekend - The Book Series***](https://raytracing.github.io) 是一套十分经典的教程，从原理和实践角度详细地阐释了 ray tracing 的基础知识，本项目便是基于该教程展开：
 
 - [x] 学习 Ray Tracing book 1，使用 Rust 语言实现该部分程序，并渲染成果图
-- [ ] 完成 Ray Tracing book 2，要求同上
-- [ ] 💠实现多线程渲染
-- [ ] code review
+- [x] 完成 Ray Tracing book 2，要求同上
+- [x] 💠实现多线程渲染
+- [x] code review
   - book 1 & 2 最终成果图
   - book 1 & 2 相关实现细节
 
