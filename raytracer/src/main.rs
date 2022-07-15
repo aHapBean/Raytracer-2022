@@ -941,7 +941,7 @@ fn main() {
     let mut samples_per_pixel = 50;
     let max_depth = 50;
 
-    let flag: i32 = 8;
+    let flag: i32 = 5;
     if flag == 1 {
         world = random_scene();
         background = Color::new(0.70, 0.80, 1.00);
@@ -974,8 +974,8 @@ fn main() {
         //lookat = Point3::new(-0.8, 0.8, -1.0);
         lookat = Point3::new(0.13, -0.09, -1.0);
         lookfrom = lookfrom.copy() - lookat.copy() * 10.0;
-        samples_per_pixel = 600;
-        image_width = 960.0;
+        samples_per_pixel = 2000;
+        image_width = 1760.0;
         aspect_ratio = 16.0 / 9.0;
         image_height = image_width / aspect_ratio;
         vfov = 20.0;
