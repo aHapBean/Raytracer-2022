@@ -89,7 +89,6 @@ fn fmin(a: f64, b: f64) -> f64 {
     }
     a
 }
-
 fn degree_to_radians(degrees: f64) -> f64 {
     //let pi = 3.141_592_653_589_793; //;;_238_5;
     degrees * PI as f64 / 180.0
@@ -99,15 +98,12 @@ fn random_double() -> f64 {
     let mut a = rand::thread_rng();
     a.gen_range(0.0..=1.0)
 }
-
 fn random_double_range(a: f64, b: f64) -> f64 {
     random_double() * (b - a) + a
 }
-
 fn random_int_range(min: i32, max: i32) -> i32 {
     random_double_range(min as f64, (max + 1) as f64) as i32
 }
-
 fn random_in_unit_dist() -> Vec3 {
     loop {
         let p = Vec3::new(
@@ -121,7 +117,6 @@ fn random_in_unit_dist() -> Vec3 {
         return p;
     }
 }
-
 fn clamp(x: f64, min: f64, max: f64) -> f64 {
     if x < min {
         return min;
@@ -131,7 +126,6 @@ fn clamp(x: f64, min: f64, max: f64) -> f64 {
     }
     x
 }
-
 /*fn write_color(pixel_color: Color, samples_per_pixel: i32) {
     let tmp = 255.999;
     let mut r = pixel_color.copy().x;
@@ -150,7 +144,6 @@ fn clamp(x: f64, min: f64, max: f64) -> f64 {
         256.0 * clamp(b, 0.0, 0.999),
     );
 }*/
-
 /*fn ray_color(r: &Ray, world: &HittableList, depth: i32) -> Color {
     let infinity = 1.79769e+308;
 
@@ -193,6 +186,7 @@ fn clamp(x: f64, min: f64, max: f64) -> f64 {
   //根据光线的信息，两个信息！起点和方向！
   //妙
   */
+
 fn ray_color(r: &Ray, background: Color, world: &HittableList, depth: i32) -> Color {
     let infinity = 1.79769e+308;
 
@@ -215,6 +209,9 @@ fn ray_color(r: &Ray, background: Color, world: &HittableList, depth: i32) -> Co
     ok = unwrap_material_scatter(&material, r, &rec, &mut attenuation, &mut scattered);
 
     if !ok {
+        //let unit_direction = r.direction().unit_vector();
+        //let t = 0.5 * (unit_direction.y() + 1.0);
+        //return (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0);
         return emitted;
     };
     return emitted
@@ -232,6 +229,7 @@ fn two_perlin_spheres() -> HittableList {
         1000.0,
         Material::Lam(Lambertian::new(&Texture::No(pretext.copy()))),
     ));
+
     world.add(ball);
     let ball = Object::Sp(Sphere::new(
         Point3::new(0.0, 2.0, 0.0),
@@ -372,6 +370,7 @@ fn simple_light() -> HittableList {
         1.5,
         difflight,
     )));
+
     world
 }
 fn cornell_box() -> HittableList {
@@ -593,9 +592,18 @@ fn final_scene() -> HittableList {
         Color::new(1.0, 1.0, 1.0),
     ))));
 
-    let emat = Material::Lam(Lambertian::new(&Texture::Im(ImageTexture::new(
-        "image/earthmap.jpg".to_string(),
-    ))));
+    //地球
+    //let emat = Material::Lam(Lambertian::new(&Texture::Im(ImageTexture::new(
+    //    "image/earthmap.jpg".to_string(),
+    //))));
+    //objects.add(Object::Sp(Sphere::new(
+    //    Point3::new(400.0, 200.0, 400.0),
+    //    100.0,
+    //    emat,
+    //)));
+    let emat = Material::Lam(Lambertian::new(&Texture::So(SolidColor::new(Color::new(
+        1.0, 1.0, 1.0,
+    )))));
     objects.add(Object::Sp(Sphere::new(
         Point3::new(400.0, 200.0, 400.0),
         100.0,
@@ -614,7 +622,7 @@ fn final_scene() -> HittableList {
         0.73, 0.73, 0.73,
     )))));
 
-    let ns: i32 = 1000;
+    let ns: i32 = 500;
     for j in 0..ns as u32 {
         let white = Material::Lam(Lambertian::new(&Texture::So(SolidColor::new(Color::new(
             0.73, 0.73, 0.73,
@@ -641,6 +649,264 @@ fn final_scene() -> HittableList {
 
     objects
 }
+fn my_scene() -> HittableList {
+    let mut world: HittableList = HittableList::hittablelist();
+
+    let red = Material::Lam(Lambertian::new(&Texture::So(SolidColor::new(Color::new(
+        0.65, 0.05, 0.05,
+    )))));
+    let white = Material::Lam(Lambertian::new(&Texture::So(SolidColor::new(Color::new(
+        0.999, 0.999, 0.999,
+    )))));
+    let green = Material::Lam(Lambertian::new(&Texture::So(SolidColor::new(Color::new(
+        0.12, 0.45, 0.15,
+    )))));
+
+    let light = Material::Dif(DiffuseLight::new(Color::new(10.0, 10.0, 10.0)));
+
+    world.add(Object::Sp(Sphere::new(
+        Point3::new(0.0, -1000.0, -1.0),
+        1000.0,
+        Material::Lam(Lambertian::new(&Texture::Ch(Box::new(
+            Checker_texture::new(
+                &Texture::So(SolidColor::new(Color::new(0.73, 0.73, 0.73))),
+                &Texture::So(SolidColor::new(Color::new(0.0, 0.0, 0.0))),
+            ),
+        )))),
+    )));
+
+    //边界
+    //let boundary = Object::Sp(Sphere::new(
+    //    Point3::new(0.0, 0.0, 0.0),
+    //    5000.0,
+    //    Material::Diel(Dielectric::new(1.5)),
+    //));
+    //world.add(Object::Co(Box::new(ConstantMedium::new_by_color(
+    //    &boundary,
+    //    0.0001,
+    //    Color::new(1.0, 1.0, 1.0),
+    //))));
+
+    //加个大光球,上方的，用来提供光线
+    world.add(Object::Sp(Sphere::new(
+        Point3::new(-4.5, 20.0, -5.8),
+        6.0,
+        unwrap_material(&Material::Dif(DiffuseLight::new(Color::new(1.0, 1.0, 1.0)))),
+    )));
+
+    //后面的小光球
+    world.add(Object::Sp(Sphere::new(
+        Point3::new(-3.8, 1.3, -5.8),
+        0.35,
+        unwrap_material(&Material::Dif(DiffuseLight::new(Color::new(0.0, 1.0, 0.8)))),
+    )));
+    world.add(Object::XY(XYrect::new(
+        -3.8,
+        -3.798,
+        1.65,
+        7.0,
+        -5.8,
+        &unwrap_material(&Material::Dif(DiffuseLight::new(Color::new(0.0, 1.0, 0.8)))),
+    )));
+
+    //绿球
+    world.add(Object::Sp(Sphere::new(
+        Point3::new(-0.8, 1.0, -1.0),
+        1.0,
+        unwrap_material(&green),
+    )));
+
+    //最后面的蓝色大球
+    world.add(Object::Sp(Sphere::new(
+        Point3::new(-3.8, 0.8, -3.0),
+        0.8,
+        Material::Lam(Lambertian::new(&Texture::So(SolidColor::new(Color::new(
+            0.0, 0.2, 0.8,
+        ))))),
+    )));
+
+    //盒子和大球
+    world.add(Object::Bo(Box::new(Boxx::new(
+        Vec3::new(1.5, 0.0, -1.0),
+        Vec3::new(3.5, 2.0, 1.0),
+        &white,
+    ))));
+    world.add(Object::Sp(Sphere::new(
+        Point3::new(2.5, 2.8, 0.0),
+        0.8,
+        red,
+    )));
+
+    //盒子右边加一个发光矩形
+    world.add(Object::YZ(YZrect::new(
+        0.0,
+        0.5,
+        1.2,
+        1.6,
+        4.5,
+        &unwrap_material(&Material::Dif(DiffuseLight::new(Color::new(1.0, 0.5, 0.0)))),
+    )));
+    world.add(Object::YZ(YZrect::new(
+        0.2,
+        0.7,
+        0.9,
+        1.3,
+        -5.4,
+        &unwrap_material(&Material::Dif(DiffuseLight::new(Color::new(
+            156.0 / 256.0,
+            204.0 / 256.0,
+            226.0 / 256.0,
+        )))),
+    )));
+
+    //前后
+    world.add(Object::XY(XYrect::new(-0.3, 0.3, 0.0, 0.6, -7.0, &light)));
+    world.add(Object::XY(XYrect::new(-0.85, -0.35, 0.0, 0.5, 5.1, &light)));
+
+    //加四个发光的box!!!
+    //改成了两个玻璃的盒子
+    //let box1 = Object::Bo(Box::new(Boxx::new(
+    //    Vec3::new(2.2, 0.0, 3.5),
+    //    Vec3::new(2.6, 0.4, 3.505),
+    //    &Material::Diel(Dielectric::new(1.5)),
+    //)));
+    //let box1 = Object::Ro(Box::new(RotateY::new(&box1, 45.0)));
+    //let box1 = Object::Tr(Box::new(Translate::new(&box1, Vec3::new(-1.5, 0.0, 2.8))));
+    //world.add(box1);
+
+    let box1 = Object::Bo(Box::new(Boxx::new(
+        Vec3::new(-3.8, 0.0, -0.7),
+        Vec3::new(-3.4, 0.4, -0.705),
+        &Material::Diel(Dielectric::new(1.5)),
+    )));
+    let box1 = Object::Ro(Box::new(RotateY::new(&box1, 45.0)));
+    let box1 = Object::Tr(Box::new(Translate::new(&box1, Vec3::new(-2.3, 0.0, -5.4))));
+    world.add(box1);
+
+    //动效小球
+    world.add(Object::Msp(MovingSphere::new(
+        Vec3::new(0.5, 0.3, 0.0),
+        Vec3::new(4.5, 0.3, 0.0),
+        0.0,
+        1.0,
+        0.2,
+        unwrap_material(&light),
+    )));
+
+    //右后的光球
+    world.add(Object::Sp(Sphere::new(
+        //4.8,0.4,-0.9
+        Point3::new(3.9, 0.4, -4.3),
+        0.4,
+        unwrap_material(&Material::Dif(DiffuseLight::new(Color::new(0.0, 0.0, 1.0)))),
+    )));
+    //交替花纹盒子
+    let box1 = Object::Bo(Box::new(Boxx::new(
+        Vec3::new(-4.4, 0.0, 3.4),
+        Vec3::new(-3.0, 1.4, 4.8),
+        &Material::Lam(Lambertian::new(&Texture::Ch(Box::new(
+            Checker_texture::new(
+                &Texture::So(SolidColor::new(Color::new(1.0, 0.0, 1.0))),
+                &Texture::So(SolidColor::new(Color::new(0.0, 1.0, 0.0))),
+            ),
+        )))),
+    )));
+    let box1 = Object::Ro(Box::new(RotateY::new(&box1, 15.0)));
+    let box1 = Object::Tr(Box::new(Translate::new(&box1, Vec3::new(5.7, 0.0, 0.0))));
+    world.add(box1);
+
+    //前面的光球
+    world.add(Object::Sp(Sphere::new(
+        Point3::new(3.0, 3.0, 4.0),
+        0.35,
+        unwrap_material(&light),
+    )));
+    world.add(Object::XY(XYrect::new(
+        3.0,
+        3.0006,
+        3.35,
+        7.0,
+        4.0,
+        &unwrap_material(&light),
+    )));
+
+    //加一个在前面光球略右边的一个玻璃球，悬空的
+    //这个材质好像还没显现出来
+    world.add(Object::Co(Box::new(ConstantMedium::new(
+        &Object::Sp(Sphere::new(
+            Vec3::new(0.4, 1.8, 2.0),
+            0.3,
+            unwrap_material(&light),
+        )),
+        0.5,
+        &Texture::So(SolidColor::new(Color::new(1.0, 1.0, 1.0))),
+    ))));
+
+    //左下角的金属球
+    world.add(Object::Sp(Sphere::new(
+        Point3::new(-2.0, 0.8, 0.8),
+        0.8,
+        Material::Met(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0)),
+    )));
+    //metal左前加一个box 或者什么东西
+    world.add(Object::Bo(Box::new(Boxx::new(
+        Vec3::new(-3.2, 0.0, 2.6),
+        Vec3::new(-2.1, 1.1, 3.7),
+        &white,
+    ))));
+    //可以考虑再加一个，两个物品相对着
+    //小长条
+    let box1 = Object::Bo(Box::new(Boxx::new(
+        Vec3::new(-1.8, 0.0, 3.5),
+        Vec3::new(-0.5, 0.3, 3.9),
+        &green,
+    )));
+    let box2 = Object::Ro(Box::new(RotateY::new(&box1, 30.0)));
+    //let box2 = Objec::
+    let box3 = Object::Tr(Box::new(Translate::new(&box2, Vec3::new(-0.2, 0.0, 1.5))));
+    world.add(box3);
+
+    //加一个金属球右前的银河大球
+    //world.add(Object::Sp(Sphere::new(
+    //    Point3::new(, 1.0, 1.7),
+    //    1.0,
+    //    Material::Lam(Lambertian::new(&Texture::Im(ImageTexture::new(
+    //        "image/mikeyway.jpg".to_string(),
+    //    )))),
+    //)));
+    world.add(Object::Sp(Sphere::new(
+        Point3::new(0.9, 1.35, 3.1),
+        1.35,
+        //Material::Lam(Lambertian::new(&Texture::Im(ImageTexture::new(
+        //    "image/mikeyway.jpg".to_string(),
+        //)))),
+        Material::Lam(Lambertian::new(&Texture::So(SolidColor::new(Color::new(
+            1.0, 1.0, 1.0,
+        ))))),
+    )));
+
+    //左后玻璃小球
+    world.add(Object::Sp(Sphere::new(
+        Point3::new(-4.3, 2.0, 0.5),
+        0.5,
+        Material::Diel(Dielectric::new(1.5)),
+    )));
+    world.add(Object::XY(XYrect::new(
+        -4.3,
+        -4.2998,
+        2.5,
+        5.0,
+        0.5,
+        &unwrap_material(&light),
+    )));
+    //let difflight = Material::Dif(DiffuseLight::new(Color::new(6.0, 6.0, 6.0)));
+    //world.add(Object::XY(XYrect::new(
+    //    3.0, 5.0, 1.0, 3.0, -2.0, &difflight,
+    //)));
+
+    world
+}
+
 fn main() {
     print!("{}[2J", 27 as char); // Clear screen
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char); // Set cursor position as 1,1
@@ -665,8 +931,8 @@ fn main() {
     //world
     let mut world: HittableList;
 
-    let lookfrom;
-    let lookat;
+    let mut lookfrom;
+    let mut lookat;
     let vup = Vec3::new(0.0, 1.0, 0.0);
     let vfov: f64;
     let dist_to_focus = 10.0;
@@ -675,7 +941,7 @@ fn main() {
     let mut samples_per_pixel = 50;
     let max_depth = 50;
 
-    let flag: i32 = 9;
+    let flag: i32 = 8;
     if flag == 1 {
         world = random_scene();
         background = Color::new(0.70, 0.80, 1.00);
@@ -702,12 +968,14 @@ fn main() {
         lookat = Point3::new(0.0, 0.0, 0.0);
         vfov = 20.0;
     } else if flag == 5 {
-        world = simple_light();
-        background = Color::new(0.0, 0.0, 0.0);
-        lookfrom = Point3::new(26.0, 3.0, 6.0);
-        lookat = Point3::new(0.0, 2.0, 0.0);
-        samples_per_pixel = 400;
-        image_width = 800.0;
+        world = my_scene();
+        background = Color::new(0.00005, 0.0005, 0.0005);
+        lookfrom = Point3::new(1.9, 7.7, 10.0);
+        //lookat = Point3::new(-0.8, 0.8, -1.0);
+        lookat = Point3::new(0.13, -0.09, -1.0);
+        lookfrom = lookfrom.copy() - lookat.copy() * 10.0;
+        samples_per_pixel = 600;
+        image_width = 960.0;
         aspect_ratio = 16.0 / 9.0;
         image_height = image_width / aspect_ratio;
         vfov = 20.0;
@@ -732,16 +1000,23 @@ fn main() {
         lookat = Vec3::new(278.0, 278.0, 0.0);
         background = Color::new(0.0, 0.0, 0.0);
         vfov = 40.0;
-    } else {
+    } else if flag == 8 {
         world = final_scene();
         aspect_ratio = 1.0;
-        image_width = 800.0;
+        image_width = 400.0;
         image_height = image_width / aspect_ratio;
         samples_per_pixel = 50;
         lookfrom = Point3::new(478.0, 278.0, -600.0);
         lookat = Point3::new(278.0, 278.0, 0.0);
         background = Color::new(0.0, 0.0, 0.0);
         vfov = 40.0;
+    } else {
+        //???
+        world = my_scene();
+        vfov = 40.0;
+        lookfrom = Point3::new(478.0, 278.0, -600.0);
+        lookat = Point3::new(278.0, 278.0, 0.0);
+        background = Point3::new(0.0, 0.0, 0.0);
     }
 
     let cam: Camera = Camera::camera(
@@ -799,24 +1074,25 @@ fn main() {
     for thread_id in 0..(THREAD_NUMBER + 2) {
         let line_beg = match thread_id {
             0 => 0,
-            1 => SECTION_LINE_NUM * 6,
-            2 => SECTION_LINE_NUM * 8,
+            1 => SECTION_LINE_NUM * 3,
+            2 => SECTION_LINE_NUM * 6,
             3 => SECTION_LINE_NUM * 10,
-            4 => SECTION_LINE_NUM * 12,
-            5 => SECTION_LINE_NUM * 13,
-            6 => SECTION_LINE_NUM * 14,
-            7 => SECTION_LINE_NUM * 15,
-            _ => SECTION_LINE_NUM * 16,
+            4 => SECTION_LINE_NUM * 13, //28000
+            5 => SECTION_LINE_NUM * 16, //和下一行对应 倒数第四个
+
+            6 => SECTION_LINE_NUM * 18,
+            7 => SECTION_LINE_NUM * 21,
+            _ => SECTION_LINE_NUM * 24,
         };
         let line_end = match thread_id {
-            0 => SECTION_LINE_NUM * 6,
-            1 => SECTION_LINE_NUM * 8,
+            0 => SECTION_LINE_NUM * 3,
+            1 => SECTION_LINE_NUM * 6,
             2 => SECTION_LINE_NUM * 10,
-            3 => SECTION_LINE_NUM * 12,
-            4 => SECTION_LINE_NUM * 13,
-            5 => SECTION_LINE_NUM * 14,
-            6 => SECTION_LINE_NUM * 15,
-            7 => SECTION_LINE_NUM * 16,
+            3 => SECTION_LINE_NUM * 13,
+            4 => SECTION_LINE_NUM * 16,
+            5 => SECTION_LINE_NUM * 18,
+            6 => SECTION_LINE_NUM * 21,
+            7 => SECTION_LINE_NUM * 24,
             _ => image_height as usize,
         };
 

@@ -190,7 +190,10 @@ impl Hit for BVH_node {
         //    Object::Msp(t) => hit_left = t.hit(r.copy(), t_min, t_max, rec),
         //    Object::BV(t) => hit_left = t.hit(r.copy(), t_min, t_max, rec),
         //}
-
+        let mut t_max = t_max;
+        if hit_left {
+            t_max = rec.t;
+        }
         let hit_right: bool;
         hit_right = unwrap_object_hit(&self.right, r.copy(), t_min, t_max, rec);
 
